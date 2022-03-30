@@ -1,0 +1,209 @@
+[
+    {
+      "fields": [
+        {
+          "mode": "REQUIRED",
+          "name": "id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "title",
+          "type": "STRING"
+        }
+      ],
+      "mode": "REPEATED",
+      "name": "previously_affected_locations",
+      "type": "RECORD"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "uri",
+      "type": "STRING"
+    },
+    {
+      "fields": [
+        {
+          "mode": "REQUIRED",
+          "name": "id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "title",
+          "type": "STRING"
+        }
+      ],
+      "mode": "REPEATED",
+      "name": "affected_products",
+      "type": "RECORD"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "service_name",
+      "type": "STRING"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "service_key",
+      "type": "STRING"
+    },
+    {
+      "mode": "REPEATED",
+      "name": "currently_affected_locations",
+      "type": "STRING"
+    },
+    {
+      "description": "bq-datetime",
+      "mode": "NULLABLE",
+      "name": "created",
+      "type": "TIMESTAMP"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "severity",
+      "type": "STRING"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "status_impact",
+      "type": "STRING"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "external_desc",
+      "type": "STRING"
+    },
+    {
+      "fields": [
+        {
+          "fields": [
+            {
+              "mode": "REQUIRED",
+              "name": "id",
+              "type": "STRING"
+            },
+            {
+              "mode": "NULLABLE",
+              "name": "title",
+              "type": "STRING"
+            }
+          ],
+          "mode": "REPEATED",
+          "name": "affected_locations",
+          "type": "RECORD"
+        },
+        {
+          "description": "bq-datetime",
+          "mode": "NULLABLE",
+          "name": "when",
+          "type": "TIMESTAMP"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "status",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "text",
+          "type": "STRING"
+        },
+        {
+          "description": "bq-datetime",
+          "mode": "NULLABLE",
+          "name": "modified",
+          "type": "TIMESTAMP"
+        },
+        {
+          "description": "bq-datetime",
+          "mode": "NULLABLE",
+          "name": "created",
+          "type": "TIMESTAMP"
+        }
+      ],
+      "mode": "NULLABLE",
+      "name": "most_recent_update",
+      "type": "RECORD"
+    },
+    {
+      "mode": "REQUIRED",
+      "name": "id",
+      "type": "STRING"
+    },
+    {
+      "fields": [
+        {
+          "fields": [
+            {
+              "mode": "REQUIRED",
+              "name": "id",
+              "type": "STRING"
+            },
+            {
+              "mode": "NULLABLE",
+              "name": "title",
+              "type": "STRING"
+            }
+          ],
+          "mode": "REPEATED",
+          "name": "affected_locations",
+          "type": "RECORD"
+        },
+        {
+          "description": "bq-datetime",
+          "mode": "NULLABLE",
+          "name": "when",
+          "type": "TIMESTAMP"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "status",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "text",
+          "type": "STRING"
+        },
+        {
+          "description": "bq-datetime",
+          "mode": "NULLABLE",
+          "name": "modified",
+          "type": "TIMESTAMP"
+        },
+        {
+          "description": "bq-datetime",
+          "mode": "NULLABLE",
+          "name": "created",
+          "type": "TIMESTAMP"
+        }
+      ],
+      "mode": "REPEATED",
+      "name": "updates",
+      "type": "RECORD"
+    },
+    {
+      "description": "bq-datetime",
+      "mode": "NULLABLE",
+      "name": "modified",
+      "type": "TIMESTAMP"
+    },
+    {
+      "description": "bq-datetime",
+      "mode": "NULLABLE",
+      "name": "begin",
+      "type": "TIMESTAMP"
+    },
+    {
+      "description": "bq-datetime",
+      "mode": "NULLABLE",
+      "name": "end",
+      "type": "TIMESTAMP"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "number",
+      "type": "STRING"
+    }
+  ]
