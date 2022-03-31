@@ -4,7 +4,7 @@ This is a simple [Bigquery Dataset](https://cloud.google.com/bigquery/docs/datas
 
 You can use this to query for events and filter the incidents you are interested.
 
-Its updated every `5minutes` and is partitioned daily
+Its triggered every minute.  If there is no update to an existing outage or a new outage not detected, no new row is inserted.
 
 You can also use this together with the [Asset Inventory API](https://cloud.google.com/asset-inventory/docs/overview) to correlate events in a given location/region with the assets that maybe impacted.
 
@@ -30,21 +30,6 @@ Here's the dataset:
 
 ### Usage
 
-- List Partitions
-
-```
-bq query --nouse_legacy_sql  '
-SELECT                     
-  _PARTITIONTIME AS pt,
-  FORMAT_TIMESTAMP("%Y%m%d", _PARTITIONTIME) AS partition_id
-FROM  
-    gcp-status-log.status_dataset.status
-GROUP BY                                    
-  _PARTITIONTIME    
-ORDER BY
-  _PARTITIONTIME
-'
-```
 
 - Query for GCE Outages
 
@@ -56,7 +41,6 @@ FROM
      gcp-status-log.status_dataset.status
 WHERE
   service_name = "Google Compute Engine"
-  AND _PARTITIONTIME = TIMESTAMP_TRUNC(CURRENT_TIMESTAMP, DAY)
 ORDER BY
   modified
 '
@@ -82,9 +66,14 @@ ORDER BY
 
 ### Schema
 
-The Schema used here is the same format as provided by the JSON output of the dashboard shown in [incidents.schema.json](https://status.cloud.google.com/incidents.schema.json).
+The Schema used here is pretty much the same format as provided by the JSON output of the dashboard shown in [incidents.schema.json](https://status.cloud.google.com/incidents.schema.json).
 
 The only difference is each row in BQ is an individual incident as opposed to all incidents encapsulated into a single JSON per the provided schema above.
+
+In addition, this schema has two new columns:
+
+* `insert_timestamp`:  this is a `TIMESTAMP` when the row/event was inserted
+* `snapshot_hash`:  this is the base64encoded hash of the `incident.json` file as it was downloaded.
 
 You can see the example schema here in this repo.
 
@@ -114,10 +103,15 @@ For everyone else, you can setup the whole thing on your own using a combination
 
 What the following sets up is:
 
-* Every 5mins, a `Cloud Scheduler` securely invokes a `Cloud Run` service
+* Every min, a `Cloud Scheduler` securely invokes a `Cloud Run` service
+* `Cloud Run` downloads a file from a GCS bucket that holds the hash of the JSON CSH file _last inserted_
 * `Cloud Run` downloads and parses the JSON CSH data
-* `Cloud Run` inserts the CSH events into `BigQuery`
+* if the hash of the file from GCS and Downloaded files are difference, then
+  * `Cloud Run` inserts the CSH events into `BigQuery`
+  * upload a file to GCS with the hash value of the CSH file just inserted
+* else, just continue
 
+ofcourse this scheme depends on the JSON CSH file remaining with the same hash value if there are no updates (eg., it does not include a freshness timestamp for its own updates)
 
 ```bash
 export PROJECT_ID=`gcloud config get-value core/project`
@@ -125,11 +119,12 @@ export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format='value(proj
 gcloud services enable containerregistry.googleapis.com \
    run.googleapis.com \
    bigquery.googleapis.com \
-   cloudscheduler.googleapis.com
+   cloudscheduler.googleapis.com \
+   storage.googleapis.com
 
 ## create the datasets.  We are using DAY partitioning
-bq mk -d --data_location=US --time_partitioning_type DAY status_dataset 
-bq mk --time_partitioning_type DAY --table status_dataset.status   schema.json
+bq mk -d --data_location=US status_dataset 
+bq mk  --table status_dataset.status   schema.json
 
 ## create service accounts for cloud run and scheduler
 gcloud iam service-accounts create schedulerunner --project=$PROJECT_ID
@@ -142,6 +137,14 @@ bq add-iam-policy-binding \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:cloudrunsvc@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/bigquery.jobUser"
+
+# create a gcs bucket to store hash of the incidents json file
+# the first value of the hash will force a reload of the incidents.json file
+gsutil mb -l us-central1 gs://$PROJECT_ID-status-hash
+echo -n "foo" > /tmp/hash.txt 
+gsutil cp  /tmp/hash.txt  gs://$PROJECT_ID-status-hash/
+
+gsutil iam ch  serviceAccount:cloudrunsvc@$PROJECT_ID.iam.gserviceaccount.com:roles/storage.admin gs://$PROJECT_ID-status-hash/
 
 ## you may also need to allow your users access to the dataset https://cloud.google.com/bigquery/docs/dataset-access-controls
 

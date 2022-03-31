@@ -205,5 +205,15 @@
       "mode": "NULLABLE",
       "name": "number",
       "type": "STRING"
-    }
+    },
+    {
+      "mode": "REQUIRED",
+      "name": "snapshot_hash",
+      "type": "STRING"
+    },       
+    {
+      "mode": "REQUIRED",
+      "name": "insert_timestamp",
+      "type": "TIMESTAMP"
+    }    
   ]
