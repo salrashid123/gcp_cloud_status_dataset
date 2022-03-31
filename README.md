@@ -184,8 +184,6 @@ $ gcloud organizations list
 DISPLAY_NAME               ID  DIRECTORY_CUSTOMER_ID
 esodemoapp2.com  673202286123              C023zwabc
 
-$ gcloud organizations --scope='organizations/673202286123'
-
 $ gcloud asset search-all-resources --scope='organizations/673202286123' \
   --query="location:us-central1-a" \
   --asset-types="compute.googleapis.com/Instance" --format="value(name)"
