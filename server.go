@@ -137,9 +137,15 @@ func fronthandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("Error getting JSON %s", res.Status)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	bodyBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("Error getting status JSON Request %v", err)
+		fmt.Printf("Error reading JSON response %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
