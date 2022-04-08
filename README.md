@@ -210,3 +210,86 @@ Why did i pick tahiti time again for the scheduler?
 Why not, see for yourself:
 
 ![images/bora-bora.jpg](images/bora-bora.jpg)
+
+---
+
+### Alternative: BQ JSON DataType
+
+The source events are JSON so you could also potentially load each event into BQ using [BQ Native Support for JSON DataType](https://cloud.google.com/bigquery/docs/reference/standard-sql/json-data#bq).
+
+This maybe a TODO and a sample workflow maybe like this:
+
+```bash
+export PROJECT_ID=`gcloud config get-value core/project`
+export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format='value(projectNumber)'`
+
+bq mk --table status_dataset.json_dataset events:JSON
+curl -o incidents.json -s https://status.cloud.google.com/incidents.json
+
+cat incidents.json  | jq -c '.[] | .' | sed 's/"/""/g' | awk '{ print "\""$0"\""}'  - > items.json
+
+
+bq load --source_format=CSV status_dataset.json_dataset items.json
+bq show status_dataset.json_dataset
+
+$ bq show status_dataset.json_dataset
+Table mineral-minutia-820:status_dataset.table1
+
+   Last modified        Schema        Total Rows   Total Bytes   Expiration   Time Partitioning   Clustered Fields   Labels  
+ ----------------- ----------------- ------------ ------------- ------------ ------------------- ------------------ -------- 
+  08 Apr 09:39:48   |- events: json   125          822184                                                          
+```
+
+
+Then to query, you can reference each filed directly:
+
+```bash
+$ bq query --nouse_legacy_sql  '
+SELECT events["id"] as id, events["number"] as number,  events["begin"] as begin
+  FROM `status_dataset.table1` 
+  LIMIT 10
+'
++------------------------+------------------------+-----------------------------+
+|           id           |         number         |            begin            |
++------------------------+------------------------+-----------------------------+
+| "ukkfXQc8CEeFZbSTYQi7" | "14166479295409213890" | "2022-03-31T19:15:00+00:00" |
+| "RmPhfQT9RDGwWLCXS2sC" |  "3617221773064871579" | "2022-03-31T18:07:00+00:00" |
+| "B1hD4KAtcxiyAWkcANfV" | "17742360388109155603" | "2022-03-31T15:30:00+00:00" |
+| "4rRjbE16mteQwUeXPZwi" |  "8134027662519725646" | "2022-03-29T21:00:00+00:00" |
+| "2j8xsJMSyDhmgfJriGeR" |  "5259740469836333814" | "2022-03-28T22:30:00+00:00" |
+| "MtMwhU6SXrpBeg5peXqY" | "17330021626924647123" | "2022-03-25T07:00:00+00:00" |
+| "R9vAbtGnhzo6n48SnqTj" |  "2948654908633925955" | "2022-03-22T22:30:00+00:00" |
+| "aA3kbJm5nwvVTKnYbrWM" |   "551739384385711524" | "2022-03-18T22:20:00+00:00" |
+| "LuGcJVjNTeC5Sb9pSJ9o" |  "5384612291846020564" | "2022-03-08T18:07:00+00:00" |
+| "Hko5cWSXxGSsxfiSpg4n" |  "6491961050454270833" | "2022-02-22T05:45:00+00:00" |
++------------------------+------------------------+-----------------------------+
+
+```
+
+The corresponding modification to Cloud Run would involve creating CSV formatted load (since as of `4/8/22`, CSV legacy loader is supported)
+
+```golang
+		var rlines []string
+		for _, event := range events {
+			event.InsertTimestamp = now
+			event.SnapshotHash = sha256Value
+			strEvent, err := json.Marshal(event)
+			if err != nil {
+				fmt.Printf("Error Marshal Event %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			// for JSON Datatype 
+			// https://cloud.google.com/bigquery/docs/reference/standard-sql/json-data
+			line := strings.Replace(string(strEvent), "\"", "\"\"", -1)
+			line = fmt.Sprintf("\"%s\"", line)
+
+			rlines = append(rlines, line)
+		}
+
+		dataString := strings.Join(rlines, "\n")
+		rolesSource := bigquery.NewReaderSource(strings.NewReader(dataString))
+		rolesSource.SourceFormat = bigquery.CSV
+```
+
+Anyway, JSON Datatype is just a TODO and i'm not sure if its necessary at the moment

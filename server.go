@@ -175,13 +175,24 @@ func fronthandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			rlines = append(rlines, string(strEvent))
+
+			line := string(strEvent)
+
+			// for JSON Datatype
+			// https://cloud.google.com/bigquery/docs/reference/standard-sql/json-data
+			//line := strings.Replace(string(strEvent), "\"", "\"\"", -1)
+			//line = fmt.Sprintf("\"%s\"", line)
+
+			rlines = append(rlines, line)
 		}
 
 		dataString := strings.Join(rlines, "\n")
 		rolesSource := bigquery.NewReaderSource(strings.NewReader(dataString))
 
 		rolesSource.SourceFormat = bigquery.JSON
+
+		// for JSON Dataype
+		// rolesSource.SourceFormat = bigquery.CSV
 
 		ctx := context.Background()
 
@@ -237,6 +248,7 @@ func fronthandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	flag.Parse()
 	http.HandleFunc("/", fronthandler)
 
 	server := &http.Server{
