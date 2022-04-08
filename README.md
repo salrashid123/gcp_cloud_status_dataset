@@ -283,6 +283,7 @@ The corresponding modification to Cloud Run would involve creating CSV formatted
 ```
 
 Anyway, JSON Datatype is just a TODO and i'm not sure if its necessary at the moment
+
 ---
 
 Why did i pick tahiti time again for the scheduler?   
