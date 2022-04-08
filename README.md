@@ -203,15 +203,6 @@ You an also query IAM roles and permissions around the world using:
 
 - [Google Cloud IAM Roles-Permissions Public Dataset](https://github.com/salrashid123/iam_bq_dataset)
 
----
-
-Why did i pick tahiti time again for the scheduler?   
-
-Why not, see for yourself:
-
-![images/bora-bora.jpg](images/bora-bora.jpg)
-
----
 
 ### Alternative: BQ JSON DataType
 
@@ -233,7 +224,6 @@ bq load --source_format=CSV status_dataset.json_dataset items.json
 bq show status_dataset.json_dataset
 
 $ bq show status_dataset.json_dataset
-Table mineral-minutia-820:status_dataset.table1
 
    Last modified        Schema        Total Rows   Total Bytes   Expiration   Time Partitioning   Clustered Fields   Labels  
  ----------------- ----------------- ------------ ------------- ------------ ------------------- ------------------ -------- 
@@ -246,7 +236,7 @@ Then to query, you can reference each filed directly:
 ```bash
 $ bq query --nouse_legacy_sql  '
 SELECT events["id"] as id, events["number"] as number,  events["begin"] as begin
-  FROM `status_dataset.table1` 
+  FROM `status_dataset.json_dataset` 
   LIMIT 10
 '
 +------------------------+------------------------+-----------------------------+
@@ -293,3 +283,13 @@ The corresponding modification to Cloud Run would involve creating CSV formatted
 ```
 
 Anyway, JSON Datatype is just a TODO and i'm not sure if its necessary at the moment
+---
+
+Why did i pick tahiti time again for the scheduler?   
+
+Why not, see for yourself:
+
+![images/bora-bora.jpg](images/bora-bora.jpg)
+
+---
+
