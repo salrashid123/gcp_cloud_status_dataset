@@ -61,8 +61,11 @@ type Event struct {
 		Title string `json:"title"`
 		ID    string `json:"id"`
 	} `json:"affected_products"`
-	URI                         string        `json:"uri"`
-	CurrentlyAffectedLocations  []interface{} `json:"currently_affected_locations"`
+	URI                        string `json:"uri"`
+	CurrentlyAffectedLocations []struct {
+		Title string `json:"title"`
+		ID    string `json:"id"`
+	} `json:"currently_affected_locations"`
 	PreviouslyAffectedLocations []struct {
 		Title string `json:"title"`
 		ID    string `json:"id"`

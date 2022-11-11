@@ -83,20 +83,6 @@ bq show --format=prettyjson --schema gcp-status-log:status_dataset.status
 
 ### Setup
 
-#### QuickStart
-
-For the impatient, you can easily just directly load an individual snapshot from CSH like this
-
-```bash
-curl -o incidents.json -s https://status.cloud.google.com/incidents.json
-cat incidents.json  | jq -c '.[] | .' > items.json
-
-bq mk -d --data_location=US  status_dataset 
-bq load  --source_format=NEWLINE_DELIMITED_JSON   status_dataset.single  items.json 
-```
-
-#### Not QuickStart
-
 For everyone else, you can setup the whole thing on your own using a combination of
 
 * `Cloud Scheduler -> Cloud Run -> BigQUery`
@@ -293,4 +279,3 @@ Why not, see for yourself:
 ![images/bora-bora.jpg](images/bora-bora.jpg)
 
 ---
-

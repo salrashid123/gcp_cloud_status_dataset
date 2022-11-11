@@ -49,9 +49,21 @@
       "type": "STRING"
     },
     {
+      "fields": [
+        {
+          "mode": "REQUIRED",
+          "name": "id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "title",
+          "type": "STRING"
+        }
+      ],
       "mode": "REPEATED",
       "name": "currently_affected_locations",
-      "type": "STRING"
+      "type": "RECORD"
     },
     {
       "description": "bq-datetime",
